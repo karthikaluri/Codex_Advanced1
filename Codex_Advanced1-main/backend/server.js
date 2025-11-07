@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
+const Problem = require("./models/Problem");
 
 // --- Initialize app and config ---
 // Load env from backend directory explicitly (works regardless of CWD)
@@ -62,7 +63,83 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("✅ MongoDB connected successfully"))
+  .then(async () => {
+    console.log("✅ MongoDB connected successfully");
+    // Auto-seed basic problems on first run if collection is empty
+    try {
+      const count = await Problem.countDocuments();
+      if (count === 0) {
+        console.log("🟡 No problems found. Seeding starter problems...");
+        await Problem.insertMany([
+          {
+            title: "Sum of Two Numbers",
+            description:
+              "Write a function add(a, b) that returns the sum of two numbers.",
+            difficulty: "Easy",
+            tags: ["math", "intro"],
+            starterCode: {
+              javascript:
+                "function add(a, b){\n  // TODO\n}\nmodule.exports = { add };\n",
+              python: "def add(a, b):\n    # TODO\n    pass\n",
+            },
+            solution: {
+              javascript:
+                "function add(a, b){ return a + b }\nmodule.exports = { add };\n",
+              python: "def add(a, b):\n    return a + b\n",
+            },
+            testCases: [
+              { input: "[1,2]", output: "3" },
+              { input: "[-1,5]", output: "4" },
+            ],
+          },
+          {
+            title: "Reverse String",
+            description: "Given a string s, return the reversed string.",
+            difficulty: "Medium",
+            tags: ["strings"],
+            starterCode: {
+              javascript:
+                "function reverseString(s){\n  // TODO\n}\nmodule.exports = { reverseString };\n",
+              python: "def reverse_string(s):\n    # TODO\n    pass\n",
+            },
+            solution: {
+              javascript:
+                "function reverseString(s){ return (s||'').split('').reverse().join('') }\nmodule.exports = { reverseString };\n",
+              python: "def reverse_string(s):\n    return (s or '')[::-1]\n",
+            },
+            testCases: [
+              { input: "['abc']", output: "cba" },
+              { input: "['']", output: "" },
+            ],
+          },
+          {
+            title: "Fibonacci",
+            description: "Return the nth Fibonacci number (0-indexed).",
+            difficulty: "Hard",
+            tags: ["dp", "recursion"],
+            starterCode: {
+              javascript:
+                "function fib(n){\n  // TODO\n}\nmodule.exports = { fib };\n",
+              python: "def fib(n):\n    # TODO\n    pass\n",
+            },
+            solution: {
+              javascript:
+                "function fib(n){ if(n<=1) return n; return fib(n-1)+fib(n-2) }\nmodule.exports = { fib };\n",
+              python:
+                "def fib(n):\n    if n <= 1:\n        return n\n    return fib(n-1) + fib(n-2)\n",
+            },
+            testCases: [
+              { input: "[0]", output: "0" },
+              { input: "[6]", output: "8" },
+            ],
+          },
+        ]);
+        console.log("✅ Seeded starter problems.");
+      }
+    } catch (e) {
+      console.warn("⚠️ Problem seeding skipped:", e.message);
+    }
+  })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
     process.exit(1); // stop server if DB fails to connect

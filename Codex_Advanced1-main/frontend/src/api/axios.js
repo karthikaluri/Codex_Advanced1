@@ -1,9 +1,12 @@
 import axios from "axios";
 
+// Prefer same-origin in production; allow override via VITE_BACKEND_URL if explicitly set
+const base =
+  (import.meta.env.VITE_BACKEND_URL &&
+    import.meta.env.VITE_BACKEND_URL.trim()) ||
+  "";
 const instance = axios.create({
-  baseURL:
-    import.meta.env.VITE_BACKEND_URL ||
-    "https://codex-advanced1-1.onrender.com",
+  baseURL: base, // '' => same-origin
 });
 
 // Attach JWT automatically if present
